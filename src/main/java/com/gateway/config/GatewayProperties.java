@@ -23,7 +23,12 @@ public record GatewayProperties(
         @DefaultValue("2") int retryMax,
         @DefaultValue("500") long retryBackoffMs,
         @DefaultValue("500") int maxItems,
-        @DefaultValue("5000000") long maxResponseBytes) {
+        @DefaultValue("5000000") long maxResponseBytes,
+        @DefaultValue("30") int cacheTtlSeconds,
+        @DefaultValue("300") int cacheMaxTtlSeconds,
+        @DefaultValue("5000") int cacheMaxEntries,
+        @DefaultValue("100") int maxConcurrentPerHost,
+        @DefaultValue("10") int queueTimeoutSeconds) {
 
     /** Opções por host. Tudo opcional; sem nada = validação TLS padrão do JDK. */
     public record Host(

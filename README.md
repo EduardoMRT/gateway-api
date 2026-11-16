@@ -22,7 +22,14 @@ v_seq := TO_NUMBER(PKG_GATEWAY.EXTRAIR(
 ```
 
 Mais exemplos (lista em SQL com `TABLE(...)`, POST) em [`oracle/03_exemplos.sql`](oracle/03_exemplos.sql).
-O contrato completo (parâmetros, formatos, erros) está em [`docs/CONTRATO.md`](docs/CONTRATO.md).
+**Manual de uso:** [`docs/MANUAL.md`](docs/MANUAL.md). O contrato completo (parâmetros, formatos,
+erros) está em [`docs/CONTRATO.md`](docs/CONTRATO.md).
+
+## Desempenho (muitas cidades ao mesmo tempo)
+
+Threads virtuais (Java 21), conexões reaproveitadas, **cache curto** para GET, **junção de pedidos
+idênticos simultâneos** (50 cidades pedindo a mesma coisa = 1 ida à API externa), limite de
+chamadas por host e contadores em `/estatisticas`. Teste de carga em `scripts/CargaTeste.java`.
 
 ## Estrutura
 
@@ -30,7 +37,9 @@ O contrato completo (parâmetros, formatos, erros) está em [`docs/CONTRATO.md`]
 |---|---|
 | `src/` | Gateway em Spring Boot 3 / Java 21 |
 | `oracle/` | `PKG_GATEWAY` e tipos para o Oracle 9i + exemplos |
+| `docs/MANUAL.md` | Manual de uso para quem programa em PL/SQL |
 | `docs/CONTRATO.md` | Contrato do gateway |
+| `scripts/CargaTeste.java` | Teste de carga (Java 21, sem dependências) |
 
 ## Rodando
 
@@ -65,6 +74,12 @@ Ajuste `C_BASE` em `PKG_GATEWAY` para o endereço do gateway.
 
 - **Extração de JSON** (`JsonExtractor`): verificada com 11 casos, incluindo objetos aninhados e
   `}` dentro de strings.
+- **Cliente HTTP, cache e concorrência** (`ExternalApiClient`, `SingleFlightCache`): verificados
+  com 31 checagens executadas contra uma API externa falsa (compilados com stubs do Spring):
+  allowlist, retry só em GET, POST sem retry, headers por API, cache, 100 pedidos idênticos
+  simultâneos = 1 chamada externa, limite por host e 503 por saturação.
+- **Capacidade real** (req/s do gateway em produção) **não foi medida**: depende da API externa e
+  do servidor. Use `scripts/CargaTeste.java` no ambiente real.
 - **Testes de integração** (`GatewayIntegrationTest`: allowlist, retry, POST sem retry, headers
   por API, 404, 400): escritos, **mas ainda não executados**. O ambiente em que o projeto foi
   criado não alcançava o Maven Central. Rode `mvn test` antes de usar.

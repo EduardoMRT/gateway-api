@@ -21,6 +21,7 @@ parsear JSON com conforto). O gateway fala HTTPS/JSON com as APIs externas e dev
 | `sep` | não | Separador de campos (1 caractere, padrão `\|`). |
 | `max` | não | Máximo de itens em `modo=todos` (nunca passa do `gateway.max-items`). |
 | `api` | não | Nome lógico de API: o gateway injeta os headers configurados (token etc.). |
+| `cache` | não | Segundos de cache (só GET). Vazio = padrão do gateway; `0` = não usar cache. Limitado a `cache-max-ttl-seconds`. |
 
 ### `POST /enviar`: envia o corpo recebido para a API externa
 
@@ -35,6 +36,11 @@ O corpo da requisição ao gateway é repassado como está. `Content-Type` tamb�
 (padrão `application/json`).
 
 ### `GET /saude`: responde `OK` (monitoramento)
+
+### `GET /estatisticas`: contadores em texto (`chave=valor`, uma por linha)
+
+`chamadas_externas`, `tentativas_extras`, `falhas_externas`, `saturados_503`, `cache_acertos`,
+`cache_chamadas_juntadas`, `cache_cargas`, `cache_tamanho`.
 
 ## Formato das respostas de sucesso (200)
 
@@ -59,6 +65,7 @@ são trocados por espaço, para o formato nunca quebrar. Objetos e arrays viram 
 | 400 | Parâmetro inválido ou ausente (mensagem no corpo) | ORA-20100 |
 | 403 | Host fora da allowlist | ORA-20100 |
 | 502 | API externa falhou (status não 2xx, JSON inválido, rede). Mensagem no corpo. | ORA-20100 |
+| 503 | Gateway saturado: limite de chamadas simultâneas ao host esgotado e a fila expirou | ORA-20100 |
 | 504 | Timeout chamando a API externa | ORA-20100 |
 | 500 | Erro interno do gateway | ORA-20100 |
 
@@ -66,6 +73,11 @@ são trocados por espaço, para o formato nunca quebrar. Objetos e arrays viram 
 
 - **Retry:** só `GET` (`retry-max` tentativas extras, em 429/502/503/504 e erros de rede).
   **POST/PUT/PATCH/DELETE nunca são repetidos**, para não duplicar efeito na API externa.
+- **Cache (só GET):** respostas 2xx ficam em memória por `cache-ttl-seconds` (padrão 30 s). A chave é
+  `api + url`, então nomes lógicos de API diferentes nunca compartilham cache. Chamadas GET idênticas
+  **simultâneas** são juntadas: só uma vai à API externa. POST/PUT/PATCH/DELETE nunca usam cache.
+- **Limite por host:** no máximo `max-concurrent-per-host` chamadas simultâneas por API externa; as
+  demais esperam até `queue-timeout-seconds` e então recebem 503.
 - **Allowlist:** só hosts listados em `gateway.hosts` são chamados. Redirects não são seguidos.
 - **SSL por host** (`gateway.hosts`): padrão = validação normal do JDK. Opções por host:
   `trust-store` (certificado próprio da API), `key-store` (certificado de cliente / mTLS) e

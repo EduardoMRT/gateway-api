@@ -1,5 +1,13 @@
 server:
   port: 8080
+  tomcat:
+    max-connections: 10000   # conexões abertas simultâneas aceitas
+    accept-count: 1000       # fila quando todas estão ocupadas
+
+spring:
+  threads:
+    virtual:
+      enabled: true          # uma thread virtual por requisição: esperar I/O é barato
 
 gateway:
   connect-timeout-seconds: 10
@@ -8,6 +16,13 @@ gateway:
   retry-backoff-ms: 500
   max-items: 500
   max-response-bytes: 5000000
+
+  # Desempenho / muitas cidades ao mesmo tempo
+  cache-ttl-seconds: 30        # GET repetido dentro deste prazo nem vai à API externa (0 = desliga)
+  cache-max-ttl-seconds: 300   # teto para o parâmetro cache= pedido pelo Oracle
+  cache-max-entries: 5000
+  max-concurrent-per-host: 100 # chamadas simultâneas por API externa; acima disso espera
+  queue-timeout-seconds: 10    # espera máxima na fila antes de responder 503
 
   # Allowlist: só hosts listados aqui podem ser chamados. Chave com ponto exige colchetes.
   hosts:

@@ -19,11 +19,13 @@ CREATE OR REPLACE PACKAGE PKG_GATEWAY AS
     --   p_onde  filtro 'campo=valor' (varios separados por ';'). Ex.: 'numeroEmpenho=123-1'
     --   p_campo campo a devolver. Aceita caminho com ponto. Ex.: 'sequencialEmpenho'
     --   p_api   nome logico da API (gateway injeta token/headers); NULL se nao precisa
+    --   p_cache segundos de cache no gateway (NULL = padrao do gateway; 0 = sempre consultar a API)
     FUNCTION EXTRAIR(p_url   IN VARCHAR2,
                      p_lista IN VARCHAR2 DEFAULT NULL,
                      p_onde  IN VARCHAR2 DEFAULT NULL,
                      p_campo IN VARCHAR2,
-                     p_api   IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2;
+                     p_api   IN VARCHAR2 DEFAULT NULL,
+                     p_cache IN NUMBER   DEFAULT NULL) RETURN VARCHAR2;
 
     -- GET na API externa; devolve VARIOS itens como tabela (use com TABLE(...)).
     --   p_campos ate 10 campos separados por virgula. Ex.: 'numero,sequencial,descricao'
@@ -33,7 +35,8 @@ CREATE OR REPLACE PACKAGE PKG_GATEWAY AS
                     p_onde   IN VARCHAR2 DEFAULT NULL,
                     p_campos IN VARCHAR2,
                     p_max    IN NUMBER   DEFAULT NULL,
-                    p_api    IN VARCHAR2 DEFAULT NULL) RETURN T_GW_TAB PIPELINED;
+                    p_api    IN VARCHAR2 DEFAULT NULL,
+                    p_cache  IN NUMBER   DEFAULT NULL) RETURN T_GW_TAB PIPELINED;
 
     -- Envia p_corpo (JSON) para a API externa com POST (ou PUT/PATCH/DELETE em p_metodo).
     -- Devolve p_campo da resposta; se p_campo for NULL, devolve o corpo bruto da resposta.
@@ -144,11 +147,13 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
                      p_lista IN VARCHAR2 DEFAULT NULL,
                      p_onde  IN VARCHAR2 DEFAULT NULL,
                      p_campo IN VARCHAR2,
-                     p_api   IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2 IS
+                     p_api   IN VARCHAR2 DEFAULT NULL,
+                     p_cache IN NUMBER   DEFAULT NULL) RETURN VARCHAR2 IS
     BEGIN
         RETURN chamar(C_BASE || '/extrair?url=' || url_encode(p_url)
                       || param('lista', p_lista) || param('onde', p_onde)
-                      || param('campo', p_campo) || param('api', p_api), NULL);
+                      || param('campo', p_campo) || param('api', p_api)
+                      || param('cache', TO_CHAR(p_cache)), NULL);
     END EXTRAIR;
 
     FUNCTION LISTAR(p_url    IN VARCHAR2,
@@ -156,7 +161,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
                     p_onde   IN VARCHAR2 DEFAULT NULL,
                     p_campos IN VARCHAR2,
                     p_max    IN NUMBER   DEFAULT NULL,
-                    p_api    IN VARCHAR2 DEFAULT NULL) RETURN T_GW_TAB PIPELINED IS
+                    p_api    IN VARCHAR2 DEFAULT NULL,
+                    p_cache  IN NUMBER   DEFAULT NULL) RETURN T_GW_TAB PIPELINED IS
         v_txt   VARCHAR2(32767);
         v_ini   PLS_INTEGER := 1;
         v_fim   PLS_INTEGER;
@@ -171,7 +177,8 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
         v_txt := chamar(C_BASE || '/extrair?url=' || url_encode(p_url)
                         || param('lista', p_lista) || param('onde', p_onde)
                         || param('campo', p_campos) || '&modo=todos'
-                        || param('max', TO_CHAR(p_max)) || param('api', p_api), NULL);
+                        || param('max', TO_CHAR(p_max)) || param('api', p_api)
+                        || param('cache', TO_CHAR(p_cache)), NULL);
         IF v_txt IS NULL THEN
             RETURN;
         END IF;

@@ -51,9 +51,18 @@ public class GatewayController {
             @RequestParam(defaultValue = "primeiro") String modo,
             @RequestParam(defaultValue = "|") String sep,
             @RequestParam(required = false) Integer max,
-            @RequestParam(required = false) String api) {
-        ExternalResponse r = client.call("GET", url, null, null, api);
+            @RequestParam(required = false) String api,
+            @RequestParam(required = false) Integer cache) {
+        ExternalResponse r = client.call("GET", url, null, null, api, cache);
         return tratar(r, lista, onde, campo, modo, sep, max);
+    }
+
+    /** Contadores simples (chave=valor por linha) para monitorar carga, cache e saturação. */
+    @GetMapping("/estatisticas")
+    public ResponseEntity<String> estatisticas() {
+        StringBuilder sb = new StringBuilder();
+        client.estatisticas().forEach((k, v) -> sb.append(k).append('=').append(v).append('\n'));
+        return resposta(200, sb.toString());
     }
 
     /** Envia (POST por padrão) o corpo recebido para a API externa. Sem {@code campo}, devolve o corpo bruto. */
@@ -70,7 +79,7 @@ public class GatewayController {
             @RequestParam(required = false) String api,
             @RequestHeader(value = "Content-Type", required = false) String contentType,
             @RequestBody(required = false) String corpo) {
-        ExternalResponse r = client.call(metodo, url, corpo, contentType, api);
+        ExternalResponse r = client.call(metodo, url, corpo, contentType, api, null);
         if (campo == null || campo.isBlank()) {
             if (!r.ok()) {
                 throw erroExterno(r);
