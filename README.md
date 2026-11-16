@@ -1,0 +1,74 @@
+# gateway-api
+
+Gateway HTTP para o **Oracle 9i** consumir APIs modernas sem sofrer com TLS e JSON.
+
+```
+Oracle 9i  --HTTP puro, rede interna-->  gateway-api  --HTTPS/TLS 1.2+-->  PNCP e outras APIs
+```
+
+O Oracle 9i não fala TLS moderno e não tem funções de JSON. O gateway faz a chamada HTTPS,
+parseia o JSON, filtra e devolve só o valor pedido, em texto puro. Para o PL/SQL, consumir uma
+API vira uma chamada de função.
+
+## Antes: ~165 linhas de PL/SQL (HTTP + `INSTR`/`SUBSTR` no JSON)
+
+## Depois
+
+```sql
+v_seq := TO_NUMBER(PKG_GATEWAY.EXTRAIR(
+             p_url   => V_URL,
+             p_onde  => 'numeroEmpenho=123-1',
+             p_campo => 'sequencialEmpenho'));
+```
+
+Mais exemplos (lista em SQL com `TABLE(...)`, POST) em [`oracle/03_exemplos.sql`](oracle/03_exemplos.sql).
+O contrato completo (parâmetros, formatos, erros) está em [`docs/CONTRATO.md`](docs/CONTRATO.md).
+
+## Estrutura
+
+| Pasta | Conteúdo |
+|---|---|
+| `src/` | Gateway em Spring Boot 3 / Java 21 |
+| `oracle/` | `PKG_GATEWAY` e tipos para o Oracle 9i + exemplos |
+| `docs/CONTRATO.md` | Contrato do gateway |
+
+## Rodando
+
+```bash
+mvn test                 # testes de integração (sobem uma "API externa" falsa)
+mvn package
+java -jar target/gateway-api-0.1.0.jar
+curl http://localhost:8080/saude
+```
+
+Config em `src/main/resources/application.yml` (ou um `application.yml` externo / variáveis de
+ambiente). **Para o gateway chamar uma API, o host dela precisa estar em `gateway.hosts`**. Sem
+isso, 403. Também dá para definir SSL por host e headers/tokens por API lógica.
+
+### Instalando o lado Oracle
+
+```
+@oracle/01_tipos.sql
+@oracle/02_pkg_gateway.sql
+```
+
+Ajuste `C_BASE` em `PKG_GATEWAY` para o endereço do gateway.
+
+## Segurança
+
+- Expor o gateway **só na rede interna**. Ele aceita URLs, então a allowlist de hosts é o que
+  impede de usá-lo para chamar qualquer coisa.
+- Credenciais ficam na config do gateway, nunca no PL/SQL.
+- `insecure: true` em um host desliga a validação do certificado dele. Use só em homologação.
+
+## Status de verificação
+
+- **Extração de JSON** (`JsonExtractor`): verificada com 11 casos, incluindo objetos aninhados e
+  `}` dentro de strings.
+- **Testes de integração** (`GatewayIntegrationTest`: allowlist, retry, POST sem retry, headers
+  por API, 404, 400): escritos, **mas ainda não executados**. O ambiente em que o projeto foi
+  criado não alcançava o Maven Central. Rode `mvn test` antes de usar.
+- **`PKG_GATEWAY` (Oracle 9i)**: **não testado**, não havia banco 9i disponível. Veja os pontos a
+  conferir no cabeçalho de `oracle/02_pkg_gateway.sql`.
+- **Pendente de validar:** se o `UTL_HTTP` do 9i consegue falar com o gateway no ambiente real, e
+  se a chamada HTTPS direta do 9i ao PNCP realmente falha (o que justifica o gateway).

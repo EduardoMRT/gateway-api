@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+gateway:
+  connect-timeout-seconds: 10
+  read-timeout-seconds: 60
+  retry-max: 2          # só GET
+  retry-backoff-ms: 500
+  max-items: 500
+  max-response-bytes: 5000000
+
+  # Allowlist: só hosts listados aqui podem ser chamados. Chave com ponto exige colchetes.
+  hosts:
+    "[pncp.gov.br]": {}
+    # Exemplo de host com certificado autoassinado (exceção explícita, nunca padrão):
+    # "[api.homolog.interna]":
+    #   insecure: true
+    # Exemplo com truststore próprio e/ou certificado de cliente (mTLS):
+    # "[api.com.mtls]":
+    #   trust-store: /etc/gateway/trust.p12
+    #   trust-store-password: ${TRUST_PASS}
+    #   key-store: /etc/gateway/client.p12
+    #   key-store-password: ${KEY_PASS}
+
+  # APIs lógicas: o Oracle cita só o nome (api=pncp) e o gateway injeta os headers.
+  apis: {}
+  #  pncp:
+  #    headers:
+  #      Authorization: "Bearer ${PNCP_TOKEN}"
