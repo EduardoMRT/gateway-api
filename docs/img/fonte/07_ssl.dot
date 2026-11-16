@@ -1,0 +1,9 @@
+digraph G { rankdir=TB; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"];
+ o [label="Oracle 9i\n(só TLS antigo)", fillcolor="#ffd9d4", color="#c0392b"];
+ g [label="gateway-api", fillcolor="#cfe3ff", color="#1f6feb"];
+ x [label="API externa\n(exige TLS 1.2+)", fillcolor="#cdeed6", color="#2e8b57"];
+ o -> g [label="  TRECHO 1\n  HTTP puro, rede interna\n  (firewall protege)  ", color="#c0392b", penwidth=2];
+ g -> x [label="  TRECHO 2\n  HTTPS moderno\n  certificado validado  ", color="#2e8b57", penwidth=2];
+ cfg [shape=note, fillcolor="#fffbe0", color="#bba800", label="Configuração por host:\n• padrão: validação normal\n• trust-store: certificado próprio da API\n• key-store: seu certificado (mTLS)\n• insecure: só homologação"];
+ g -> cfg [style=dashed, arrowhead=none, color="#bba800"];
+}

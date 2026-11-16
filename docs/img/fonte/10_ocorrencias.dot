@@ -1,0 +1,6 @@
+digraph G { rankdir=LR; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"];
+ j [shape=none, style="", margin=0, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4" BGCOLOR="#f7f7f7" COLOR="#888888"><TR><TD><B>3 itens, 2 batem com o filtro</B></TD></TR><TR><TD ALIGN="LEFT" BALIGN="LEFT"><FONT FACE="DejaVu Sans Mono" POINT-SIZE="10">1) numero 122-1  seq 41  ✗<BR/><B>2) numero 123-1  seq 42  ✓</B><BR/><B>3) numero 123-1  seq 43  ✓</B></FONT></TD></TR></TABLE>>];
+ p [label="EXTRAIR\n(modo primeiro)", fillcolor="#cfe3ff", color="#1f6feb"]; pr [label="42\n(só o 1º que bate,\nna ordem da API)", fillcolor="#cdeed6", color="#2e8b57"];
+ t [label="LISTAR\n(modo todos)", fillcolor="#cfe3ff", color="#1f6feb"]; tr [label="42\n43\n(todos que batem)", fillcolor="#cdeed6", color="#2e8b57"];
+ j -> p -> pr; j -> t -> tr;
+}

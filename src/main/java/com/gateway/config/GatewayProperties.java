@@ -39,7 +39,10 @@ public record GatewayProperties(
             String keyStorePassword) {
     }
 
-    /** Configuração de uma API lógica. */
-    public record Api(@DefaultValue Map<String, String> headers) {
+    /**
+     * Configuração de uma API lógica. Se {@code host} for informado, os headers (token) só são
+     * enviados para esse host; usar a API em outro host é recusado (evita vazar credencial).
+     */
+    public record Api(String host, @DefaultValue Map<String, String> headers) {
     }
 }

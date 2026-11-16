@@ -1,0 +1,9 @@
+digraph G { rankdir=LR; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"]; ranksep=0.45;
+ q [label="O gateway respondeu com...", fillcolor="#fff6e5", color="#d98e04"];
+ a [label="200\ncom texto", fillcolor="#cdeed6", color="#2e8b57"]; a2 [label="PL/SQL recebe o valor", fillcolor="#cdeed6", color="#2e8b57"];
+ b [label="404\ncorpo vazio", fillcolor="#fff6e5", color="#d98e04"]; b2 [label="NULL / zero linhas\n(não é erro)", fillcolor="#fff6e5", color="#d98e04"];
+ c [label="400 / 403", fillcolor="#ffd9d4", color="#c0392b"]; c2 [label="Erro de uso: parâmetro, filtro,\nAPI lógica ou host não liberado\n→ ORA-20100", fillcolor="#ffd9d4", color="#c0392b"];
+ d [label="502 / 504", fillcolor="#ffd9d4", color="#c0392b"]; d2 [label="A API externa falhou, devolveu\nalgo inválido ou demorou\n→ ORA-20100", fillcolor="#ffd9d4", color="#c0392b"];
+ e [label="503", fillcolor="#ffd9d4", color="#c0392b"]; e2 [label="Gateway saturado para esse host\n→ tente de novo ORA-20100", fillcolor="#ffd9d4", color="#c0392b"];
+ q -> a -> a2; q -> b -> b2; q -> c -> c2; q -> d -> d2; q -> e -> e2;
+}

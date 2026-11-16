@@ -22,7 +22,8 @@ v_seq := TO_NUMBER(PKG_GATEWAY.EXTRAIR(
 ```
 
 Mais exemplos (lista em SQL com `TABLE(...)`, POST) em [`oracle/03_exemplos.sql`](oracle/03_exemplos.sql).
-**Manual de uso:** [`docs/MANUAL.md`](docs/MANUAL.md). O contrato completo (parâmetros, formatos,
+**Manual completo:** [`docs/MANUAL.md`](docs/MANUAL.md) · [PDF](docs/MANUAL.pdf)
+(regenerar o PDF: `python3 scripts/gerar_pdf.py`). O contrato completo (parâmetros, formatos,
 erros) está em [`docs/CONTRATO.md`](docs/CONTRATO.md).
 
 ## Desempenho (muitas cidades ao mesmo tempo)
@@ -37,7 +38,8 @@ chamadas por host e contadores em `/estatisticas`. Teste de carga em `scripts/Ca
 |---|---|
 | `src/` | Gateway em Spring Boot 3 / Java 21 |
 | `oracle/` | `PKG_GATEWAY` e tipos para o Oracle 9i + exemplos |
-| `docs/MANUAL.md` | Manual de uso para quem programa em PL/SQL |
+| `docs/MANUAL.md`, `docs/MANUAL.pdf` | Manual completo (conceitos, diagramas, uso, SSL, listas, problemas) |
+| `docs/img/` | Diagramas do manual (fontes Graphviz em `docs/img/fonte/`) |
 | `docs/CONTRATO.md` | Contrato do gateway |
 | `scripts/CargaTeste.java` | Teste de carga (Java 21, sem dependências) |
 
@@ -75,7 +77,7 @@ Ajuste `C_BASE` em `PKG_GATEWAY` para o endereço do gateway.
 - **Extração de JSON** (`JsonExtractor`): verificada com 11 casos, incluindo objetos aninhados e
   `}` dentro de strings.
 - **Cliente HTTP, cache e concorrência** (`ExternalApiClient`, `SingleFlightCache`): verificados
-  com 31 checagens executadas contra uma API externa falsa (compilados com stubs do Spring):
+  com 33 checagens executadas contra uma API externa falsa (compilados com stubs do Spring):
   allowlist, retry só em GET, POST sem retry, headers por API, cache, 100 pedidos idênticos
   simultâneos = 1 chamada externa, limite por host e 503 por saturação.
 - **Capacidade real** (req/s do gateway em produção) **não foi medida**: depende da API externa e

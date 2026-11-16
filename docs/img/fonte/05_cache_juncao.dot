@@ -1,0 +1,8 @@
+digraph G { rankdir=LR; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"];
+ subgraph cluster_s { label="SEM junção: 100 pedidos iguais = 100 chamadas"; style="rounded,filled"; fillcolor="#fff1f0"; color="#c0392b";
+   s1 [label="100 cidades\npedem o mesmo dado", fillcolor="#ffd9d4"]; s2 [label="gateway\n(só repassa)"]; s3 [label="API externa\nrecebe 100 chamadas", fillcolor="#ffd9d4", color="#c0392b"];
+   s1 -> s2 [label=" 100 "]; s2 -> s3 [label=" 100 ", color="#c0392b", penwidth=3]; }
+ subgraph cluster_c { label="COM junção + cache: 100 pedidos iguais = 1 chamada"; style="rounded,filled"; fillcolor="#eaf7ee"; color="#2e8b57";
+   c1 [label="100 cidades\npedem o mesmo dado", fillcolor="#ffd9d4"]; c2 [label="gateway\n1 busca; 99 esperam\ne reaproveitam", fillcolor="#cfe3ff", color="#1f6feb"]; c3 [label="API externa\nrecebe 1 chamada", fillcolor="#cdeed6", color="#2e8b57"];
+   c1 -> c2 [label=" 100 "]; c2 -> c3 [label=" 1 ", color="#2e8b57", penwidth=1.5]; }
+}

@@ -1,0 +1,14 @@
+digraph G { rankdir=TB; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"]; ranksep=0.75;
+ subgraph cluster_o { label="Banco Oracle 9i"; style="rounded,filled"; fillcolor="#fff1f0"; color="#c0392b";
+   pkg [label="Seu código PL/SQL  →  PKG_GATEWAY\nEXTRAIR · LISTAR · ENVIAR", fillcolor="#ffd9d4", color="#c0392b"]; }
+ gw [shape=none, style="", margin=0, label=<<TABLE BORDER="2" COLOR="#1f6feb" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#eaf3ff" STYLE="ROUNDED">
+   <TR><TD><B>gateway-api  (Java 21 / Spring Boot)</B></TD></TR><HR/>
+   <TR><TD ALIGN="LEFT">1. Allowlist de hosts</TD></TR>
+   <TR><TD ALIGN="LEFT">2. Cache + junção de pedidos idênticos</TD></TR>
+   <TR><TD ALIGN="LEFT">3. Cliente HTTPS (TLS 1.2+, retry, token)</TD></TR>
+   <TR><TD ALIGN="LEFT">4. Leitor de JSON (lista · filtro · campo)</TD></TR></TABLE>>];
+ subgraph cluster_e { label="Internet / serviços externos"; labelloc=b; style="rounded,filled"; fillcolor="#eaf7ee"; color="#2e8b57";
+   x [label="PNCP", fillcolor="#cdeed6", color="#2e8b57"]; y [label="Outras APIs", fillcolor="#cdeed6", color="#2e8b57"]; }
+ pkg -> gw [label="  HTTP simples (rede interna)  \n  texto puro na resposta  ", color="#c0392b", penwidth=2.5, fontsize=12];
+ gw -> x [label="  HTTPS + JSON  ", color="#2e8b57", penwidth=2.5, fontsize=12]; gw -> y [color="#2e8b57", penwidth=2.5];
+}

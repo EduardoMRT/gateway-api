@@ -1,0 +1,8 @@
+digraph G { rankdir=TB; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"];
+ subgraph cluster_a { label="ANTES: cada função faz tudo"; style="rounded,filled"; fillcolor="#fff6e5"; color="#d98e04";
+   a1 [label="PL/SQL"]; a2 [label="UTL_HTTP\n(abre, lê, fecha, status)"]; a3 [label="Parse JSON\ncom INSTR/SUBSTR"]; a4 [label="API externa\n(TLS 1.2 ✗ no 9i)", fillcolor="#ffd9d4", color="#c0392b"];
+   a1 -> a2 -> a4 [label=" HTTPS direto\n pode falhar "]; a2 -> a3 [label=" ~165\n linhas "]; }
+ subgraph cluster_d { label="DEPOIS: uma chamada de função"; style="rounded,filled"; fillcolor="#eaf7ee"; color="#2e8b57";
+   d1 [label="PL/SQL"]; d2 [label="PKG_GATEWAY.EXTRAIR(...)\n~5 linhas", fillcolor="#cdeed6", color="#2e8b57"]; d3 [label="gateway-api", fillcolor="#cfe3ff", color="#1f6feb"]; d4 [label="API externa", fillcolor="#cdeed6", color="#2e8b57"];
+   d1 -> d2 -> d3 [label=" HTTP simples "]; d3 -> d4 [label=" HTTPS "]; }
+}

@@ -71,11 +71,11 @@ public class ExternalApiClient {
             throw new GatewayException(400, "Método não suportado: " + metodo);
         }
         URI uri = parse(url);
-        String host = uri.getHost();
+        String host = uri.getHost() == null ? null : uri.getHost().toLowerCase();
         if (host == null || !props.hosts().containsKey(host)) {
             throw new GatewayException(403, "Host não permitido: " + host);
         }
-        Map<String, String> headers = headersDaApi(api);
+        Map<String, String> headers = headersDaApi(api, host);
         boolean temCorpo = body != null && !body.isEmpty();
 
         if ("GET".equals(method) && !temCorpo) {
@@ -94,13 +94,16 @@ public class ExternalApiClient {
         return Math.max(0, Math.min(ttl, props.cacheMaxTtlSeconds()));
     }
 
-    private Map<String, String> headersDaApi(String api) {
+    private Map<String, String> headersDaApi(String api, String host) {
         if (api == null || api.isBlank()) {
             return Map.of();
         }
         GatewayProperties.Api cfg = props.apis().get(api);
         if (cfg == null) {
             throw new GatewayException(400, "API lógica desconhecida: " + api);
+        }
+        if (cfg.host() != null && !cfg.host().equalsIgnoreCase(host)) {
+            throw new GatewayException(403, "A API lógica '" + api + "' não pode ser usada com o host " + host);
         }
         return cfg.headers();
     }

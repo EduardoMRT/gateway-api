@@ -1,0 +1,16 @@
+digraph G { rankdir=TB; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"]; ranksep=0.4;
+ n1 [label="1. PL/SQL chama PKG_GATEWAY.EXTRAIR(url, filtro, campo)", fillcolor="#ffd9d4", color="#c0392b"];
+ n2 [label="2. O package monta a URL do gateway\n(com codificação UTF-8) e faz GET", fillcolor="#ffd9d4", color="#c0392b"];
+ n3 [label="3. Gateway: o host está na allowlist?", shape=diamond, fillcolor="#fff6e5", color="#d98e04", style=filled];
+ e403 [label="403 Host não permitido", fillcolor="#ffd9d4", color="#c0392b"];
+ n4 [label="4. Resposta já está no cache\nou alguém já está buscando?", shape=diamond, fillcolor="#fff6e5", color="#d98e04", style=filled];
+ n5 [label="5. Chama a API externa (HTTPS)\nretry em erro transitório (só GET)", fillcolor="#cfe3ff", color="#1f6feb"];
+ n6 [label="6. Status 2xx?", shape=diamond, fillcolor="#fff6e5", color="#d98e04", style=filled];
+ e502 [label="404 → NULL  ·  outro → 502", fillcolor="#ffd9d4", color="#c0392b"];
+ n7 [label="7. Lê o JSON: acha a lista,\nfiltra os itens, pega o(s) campo(s)", fillcolor="#cfe3ff", color="#1f6feb"];
+ n8 [label="8. Devolve texto puro (200)\nou 404 se nada bateu", fillcolor="#cfe3ff", color="#1f6feb"];
+ n9 [label="9. O package devolve VARCHAR2\n(ou NULL / erro ORA-20100)", fillcolor="#ffd9d4", color="#c0392b"];
+ n1->n2->n3; n3->e403 [label=" não "]; n3->n4 [label=" sim "];
+ n4->n7 [label=" sim: reaproveita\n (sem ir à API) ", color="#2e8b57"]; n4->n5 [label=" não "];
+ n5->n6; n6->n7 [label=" sim "]; n6->e502 [label=" não "]; n7->n8->n9;
+}

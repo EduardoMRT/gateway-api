@@ -1,0 +1,14 @@
+digraph G { rankdir=TB; graph [fontname="DejaVu Sans", fontsize=13, pad=0.3, nodesep=0.45, ranksep=0.6, bgcolor="white"]; node [fontname="DejaVu Sans", fontsize=12, shape=box, style="rounded,filled", fillcolor="#f4f4f4", color="#888888", margin="0.2,0.12"]; edge [fontname="DejaVu Sans", fontsize=11, color="#555555"];
+ json [shape=none, style="", margin=0, label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" BGCOLOR="#f7f7f7" COLOR="#888888">
+ <TR><TD ALIGN="LEFT"><B>JSON devolvido pela API</B></TD></TR>
+ <TR><TD ALIGN="LEFT" BALIGN="LEFT"><FONT FACE="DejaVu Sans Mono" POINT-SIZE="11">{ "data": [<BR/>
+ &#160; { "numeroEmpenho": "122-1", "sequencialEmpenho": 41 },<BR/>
+ &#160; <B>{ "numeroEmpenho": "123-1", "sequencialEmpenho": 42 }</B>,<BR/>
+ &#160; { "numeroEmpenho": "124-1", "sequencialEmpenho": 43 }<BR/>
+ ] }</FONT></TD></TR></TABLE>>];
+ p [label="p_lista => 'data'\n\nonde está a lista?", fillcolor="#cfe3ff", color="#1f6feb"];
+ f [label="p_onde => 'numeroEmpenho=123-1'\n\nquais itens servem?", fillcolor="#cfe3ff", color="#1f6feb"];
+ c [label="p_campo => 'sequencialEmpenho'\n\nqual valor quero?", fillcolor="#cfe3ff", color="#1f6feb"];
+ r [label="42", shape=circle, fillcolor="#cdeed6", color="#2e8b57", fontsize=18];
+ json -> p -> f -> c -> r;
+}
