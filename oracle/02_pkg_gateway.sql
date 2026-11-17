@@ -11,8 +11,11 @@
 
 CREATE OR REPLACE PACKAGE PKG_GATEWAY AS
 
-    -- Endereco do gateway (HTTP puro, rede interna). Ajuste conforme o ambiente.
-    C_BASE CONSTANT VARCHAR2(200) := 'http://gateway-interno:8080';
+    -- Endereco do gateway (HTTP puro, rede interna), como o SERVIDOR DO BANCO o enxerga.
+    -- 'localhost' so serve se o gateway roda na mesma maquina do banco.
+    -- Ajuste o valor padrao abaixo (e recompile) ou troque so na sessao, sem recompilar:
+    --     BEGIN PKG_GATEWAY.G_BASE := 'http://192.168.0.10:8080'; END;
+    G_BASE VARCHAR2(200) := 'http://localhost:8080';
 
     -- GET na API externa; devolve UM valor (campo do primeiro item que bate com o filtro).
     -- NULL = nada encontrado (gateway devolveu 404). Erro = RAISE -20100.
@@ -152,7 +155,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
                      p_api   IN VARCHAR2 DEFAULT NULL,
                      p_cache IN NUMBER   DEFAULT NULL) RETURN VARCHAR2 IS
     BEGIN
-        RETURN chamar(C_BASE || '/extrair?url=' || url_encode(p_url)
+        RETURN chamar(G_BASE || '/extrair?url=' || url_encode(p_url)
                       || param('lista', p_lista) || param('onde', p_onde)
                       || param('campo', p_campo) || param('api', p_api)
                       || param('cache', TO_CHAR(p_cache)), NULL);
@@ -176,7 +179,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
         p1      PLS_INTEGER;
         p2      PLS_INTEGER;
     BEGIN
-        v_txt := chamar(C_BASE || '/extrair?url=' || url_encode(p_url)
+        v_txt := chamar(G_BASE || '/extrair?url=' || url_encode(p_url)
                         || param('lista', p_lista) || param('onde', p_onde)
                         || param('campo', p_campos) || CHR(38) || 'modo=todos'
                         || param('max', TO_CHAR(p_max)) || param('api', p_api)
@@ -231,7 +234,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
                     p_metodo IN VARCHAR2 DEFAULT 'POST',
                     p_api    IN VARCHAR2 DEFAULT NULL) RETURN VARCHAR2 IS
     BEGIN
-        RETURN chamar(C_BASE || '/enviar?url=' || url_encode(p_url)
+        RETURN chamar(G_BASE || '/enviar?url=' || url_encode(p_url)
                       || param('metodo', p_metodo) || param('campo', p_campo)
                       || param('api', p_api), NVL(p_corpo, ' '));
     END ENVIAR;

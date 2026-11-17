@@ -63,7 +63,7 @@ isso, 403. Também dá para definir SSL por host e headers/tokens por API lógic
 @oracle/02_pkg_gateway.sql
 ```
 
-Ajuste `C_BASE` em `PKG_GATEWAY` para o endereço do gateway.
+Ajuste `G_BASE` em `PKG_GATEWAY` para o endereço do gateway (ou, só na sessão: `BEGIN PKG_GATEWAY.G_BASE := 'http://IP:8080'; END;`).
 
 ## Segurança
 

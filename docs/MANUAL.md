@@ -207,7 +207,15 @@ em `/app/config/application.yml` (veja a seção 5).
 Antes de rodar o segundo, abra o arquivo e ajuste o endereço do gateway:
 
 ```sql
-C_BASE CONSTANT VARCHAR2(200) := 'http://servidor-gateway:8080';
+G_BASE VARCHAR2(200) := 'http://servidor-gateway:8080';
+```
+
+O endereço deve ser o do gateway **como o servidor do banco o enxerga**. `localhost` só funciona se o
+gateway roda na mesma máquina do banco. Para testar outro endereço **sem recompilar**, troque só na sessão:
+
+```sql
+BEGIN PKG_GATEWAY.G_BASE := 'http://192.168.0.10:8080'; END;
+/
 ```
 
 O usuário do banco precisa de `EXECUTE` em `UTL_HTTP`. No Oracle 9i não existe ACL de rede (ela só
@@ -704,7 +712,7 @@ Todos os erros chegam como `ORA-20100` com a mensagem do gateway.
 | `Gateway HTTP 503: Gateway saturado` | Muitas chamadas simultâneas ao host | Tente de novo; avise a infraestrutura se for frequente |
 | `Gateway HTTP 504: Timeout` | A API externa demorou demais | Tente de novo; a API pode estar fora do ar |
 | `ORA-20101: Resposta do gateway excede 32767` | Resultado grande demais para o 9i | `p_max`, mais filtros |
-| `ORA-29273`, `ORA-12535` e similares | O Oracle não alcança o gateway | Confira `C_BASE`, rede, `EXECUTE` em `UTL_HTTP` |
+| `ORA-29273`, `ORA-12535` e similares | O Oracle não alcança o gateway | Confira `G_BASE`, rede, `EXECUTE` em `UTL_HTTP` |
 
 ### 11.2 Armadilhas silenciosas (as mais perigosas: nada dá erro)
 
@@ -776,7 +784,7 @@ Quando algo não funciona, siga em ordem. Cada passo isola uma parte do caminho.
 5. **Leia os logs do gateway.** Cada chamada externa registra: método, host, caminho, status e tempo.
    Erros de SSL e de rede aparecem aqui. (A query string não é registrada de propósito.)
 6. **Veja `/estatisticas`.** `saturados_503` ou `falhas_externas` altos indicam sobrecarga ou API instável.
-7. **Só então, o PL/SQL:** confira `C_BASE`, notação nomeada, `SQLERRM` do `ORA-20100`.
+7. **Só então, o PL/SQL:** confira `G_BASE`, notação nomeada, `SQLERRM` do `ORA-20100`.
 
 ---
 
