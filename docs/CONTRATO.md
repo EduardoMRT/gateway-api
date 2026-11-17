@@ -78,8 +78,8 @@ são trocados por espaço, para o formato nunca quebrar. Objetos e arrays viram 
   **simultâneas** são juntadas: só uma vai à API externa. POST/PUT/PATCH/DELETE nunca usam cache.
 - **Limite por host:** no máximo `max-concurrent-per-host` chamadas simultâneas por API externa; as
   demais esperam até `queue-timeout-seconds` e então recebem 503.
-- **Allowlist:** só hosts listados em `gateway.hosts` são chamados. Redirects não são seguidos.
-- **SSL por host** (`gateway.hosts`): padrão = validação normal do JDK. Opções por host:
+- **Allowlist:** só hosts listados em `gateway.allowed-hosts` (ou em `gateway.hosts`) são chamados. Redirects não são seguidos.
+- **SSL por host** (`gateway.hosts`, opcional): padrão = validação normal do JDK. Opções por host:
   `trust-store` (certificado próprio da API), `key-store` (certificado de cliente / mTLS) e
   `insecure: true` (aceita qualquer certificado; exceção explícita, só para homologação/interno).
 - **Credenciais** ficam só no gateway (`gateway.apis.<nome>.headers`); o Oracle cita só o nome em `api=`.

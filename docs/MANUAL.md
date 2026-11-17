@@ -238,16 +238,18 @@ O gateway **só chama hosts da lista**. Qualquer outro recebe erro 403.
 
 ```yaml
 gateway:
-  hosts:
-    "[pncp.gov.br]": {}
-    "[api.outra.gov.br]": {}
+  allowed-hosts:
+    - pncp.gov.br
+    - viacep.com.br
+    - api.outra.gov.br
 ```
 
 Regras:
 
-- Nome do host **em minúsculas**, sem `https://` e sem porta.
-- Nomes com ponto precisam de colchetes e aspas, como acima.
+- Nome do host **sem** `https://`, sem porta e sem caminho (o gateway ignora maiúsculas/minúsculas).
 - Só o **host** é conferido (a URL pode ter qualquer caminho).
+- Um host que tenha opções de SSL em `gateway.hosts` (seção 8) também é considerado liberado.
+- Para liberar uma API nova, é só incluir uma linha aqui e reiniciar.
 
 ### 5.2 Todas as opções
 
@@ -266,7 +268,8 @@ gateway:
   max-concurrent-per-host: 100    # chamadas simultâneas por API externa
   queue-timeout-seconds: 10       # espera na fila antes de devolver 503
 
-  hosts: { ... }                  # allowlist + SSL por host (seção 8)
+  allowed-hosts: [ ... ]          # allowlist (seção 5.1)
+  hosts: { ... }                  # opcional: opções de SSL por host (seção 8)
   apis:  { ... }                  # APIs lógicas com token (seção 9)
 ```
 
@@ -689,7 +692,7 @@ Todos os erros chegam como `ORA-20100` com a mensagem do gateway.
 
 | Mensagem | Causa | O que fazer |
 |---|---|---|
-| `Gateway HTTP 403: Host não permitido: x` | O host não está em `gateway.hosts` | Pedir à infraestrutura para liberar (seção 5.1) |
+| `Gateway HTTP 403: Host não permitido: x` | O host não está em `gateway.allowed-hosts` | Pedir à infraestrutura para liberar (seção 5.1) |
 | `Gateway HTTP 403: A API lógica 'x' não pode ser usada com o host y` | `p_api` preso a outro host | Use a API com o host certo, ou cadastre outra |
 | `Gateway HTTP 400: API lógica desconhecida` | `p_api` com nome inexistente | Confira o nome em `gateway.apis` |
 | `Gateway HTTP 400: Filtro inválido` | `p_onde` sem `=` | Use `campo=valor` |
@@ -744,7 +747,7 @@ O Oracle desiste antes. Solução: reduza `read-timeout-seconds` (ex.: 30) ou `r
 `SET_TRANSFER_TIMEOUT` no `PKG_GATEWAY`.
 
 **10. Host novo esquecido.**
-Toda API nova exige liberar o host em `gateway.hosts` e **reiniciar** o gateway.
+Toda API nova exige liberar o host em `gateway.allowed-hosts` e **reiniciar** o gateway.
 
 **11. Credenciais compartilhadas no cache.**
 Veja a seção 9.3: uma API lógica por cidade quando os tokens diferem.
@@ -781,7 +784,7 @@ Quando algo não funciona, siga em ordem. Cada passo isola uma parte do caminho.
 
 1. **O gateway não tem login próprio.** Quem alcança a rede dele consegue usá-lo, **inclusive com os
    tokens que ele injeta**. Por isso: **exponha somente na rede interna** (firewall), nunca na internet.
-2. **A allowlist (`gateway.hosts`) é a proteção contra uso indevido.** Sem ela, o gateway aceitaria
+2. **A allowlist (`gateway.allowed-hosts`) é a proteção contra uso indevido.** Sem ela, o gateway aceitaria
    qualquer URL (risco de SSRF: usá-lo para acessar serviços internos). Libere apenas hosts de APIs
    que você realmente usa.
 3. **Tokens e senhas só na configuração do gateway** (variáveis de ambiente ou arquivo protegido), nunca no PL/SQL.
@@ -841,7 +844,7 @@ END F_D_CONSULTA_EMPENHO;
 
 ### 14.3 Checklist da migração
 
-- [ ] `pncp.gov.br` está em `gateway.hosts` e o gateway foi reiniciado.
+- [ ] `pncp.gov.br` está em `gateway.allowed-hosts` e o gateway foi reiniciado.
 - [ ] A URL de `F_D_URL_API_PNCP` funciona no navegador/`curl`.
 - [ ] O `curl` ao gateway devolve o mesmo sequencial que a função antiga.
 - [ ] Os casos "empenho inexistente" e "empenho sem sequencial" (ambos `NULL`) continuam corretos.

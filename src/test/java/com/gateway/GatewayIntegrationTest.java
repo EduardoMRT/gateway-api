@@ -23,7 +23,7 @@ import org.springframework.http.ResponseEntity;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-            "gateway.hosts[localhost]=",
+            "gateway.allowed-hosts=localhost",
             "gateway.apis[teste].headers[X-Token]=segredo",
             "gateway.retry-backoff-ms=10"
         })

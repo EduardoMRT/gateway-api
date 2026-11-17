@@ -53,7 +53,7 @@ curl http://localhost:8080/saude
 ```
 
 Config em `src/main/resources/application.yml` (ou um `application.yml` externo / variáveis de
-ambiente). **Para o gateway chamar uma API, o host dela precisa estar em `gateway.hosts`**. Sem
+ambiente). **Para o gateway chamar uma API, o host dela precisa estar em `gateway.allowed-hosts`**. Sem
 isso, 403. Também dá para definir SSL por host e headers/tokens por API lógica.
 
 ### Instalando o lado Oracle

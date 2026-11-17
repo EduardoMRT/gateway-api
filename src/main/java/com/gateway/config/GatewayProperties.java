@@ -1,5 +1,6 @@
 package com.gateway.config;
 
+import java.util.List;
 import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -8,14 +9,15 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * Configuração do gateway.
  *
  * <ul>
- *   <li>{@code hosts}: lista de hosts permitidos (allowlist). Host fora da lista = 403.
- *       Cada host pode ter opções de SSL.</li>
+ *   <li>{@code allowedHosts}: lista de hosts permitidos (allowlist). Host fora da lista = 403.</li>
+ *   <li>{@code hosts}: opções de SSL por host (opcional). Host listado aqui também é permitido.</li>
  *   <li>{@code apis}: nomes lógicos de API; o Oracle cita só o nome e o gateway injeta os headers
  *       (token etc.), então credenciais nunca passam pelo PL/SQL.</li>
  * </ul>
  */
 @ConfigurationProperties(prefix = "gateway")
 public record GatewayProperties(
+        @DefaultValue List<String> allowedHosts,
         @DefaultValue Map<String, Host> hosts,
         @DefaultValue Map<String, Api> apis,
         @DefaultValue("10") int connectTimeoutSeconds,
