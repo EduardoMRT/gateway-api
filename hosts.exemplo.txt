@@ -1,0 +1,8 @@
+# Hosts que o gateway pode chamar. Um por linha. Linhas começadas por # são ignoradas.
+# Para usar: defina a variável de ambiente GATEWAY_HOSTS_FILE com o caminho deste arquivo.
+# Adicionar ou remover uma linha vale em poucos segundos, sem reiniciar o gateway.
+# Pode colar a URL inteira: só o host é usado.
+
+pncp.gov.br
+viacep.com.br
+# api.outra.gov.br

@@ -37,6 +37,8 @@ O corpo da requisição ao gateway é repassado como está. `Content-Type` tamb�
 
 ### `GET /saude`: responde `OK` (monitoramento)
 
+### `GET /hosts`: hosts liberados no momento, um por linha
+
 ### `GET /estatisticas`: contadores em texto (`chave=valor`, uma por linha)
 
 `chamadas_externas`, `tentativas_extras`, `falhas_externas`, `saturados_503`, `cache_acertos`,
@@ -78,7 +80,7 @@ são trocados por espaço, para o formato nunca quebrar. Objetos e arrays viram 
   **simultâneas** são juntadas: só uma vai à API externa. POST/PUT/PATCH/DELETE nunca usam cache.
 - **Limite por host:** no máximo `max-concurrent-per-host` chamadas simultâneas por API externa; as
   demais esperam até `queue-timeout-seconds` e então recebem 503.
-- **Allowlist:** só hosts listados em `gateway.allowed-hosts` (ou em `gateway.hosts`) são chamados. Redirects não são seguidos.
+- **Allowlist:** só hosts liberados são chamados: variável `GATEWAY_HOSTS`, `gateway.allowed-hosts`, arquivo `GATEWAY_HOSTS_FILE` (relido sem reiniciar) ou `gateway.hosts`. Redirects não são seguidos.
 - **SSL por host** (`gateway.hosts`, opcional): padrão = validação normal do JDK. Opções por host:
   `trust-store` (certificado próprio da API), `key-store` (certificado de cliente / mTLS) e
   `insecure: true` (aceita qualquer certificado; exceção explícita, só para homologação/interno).

@@ -53,7 +53,8 @@ curl http://localhost:8080/saude
 ```
 
 Config em `src/main/resources/application.yml` (ou um `application.yml` externo / variáveis de
-ambiente). **Para o gateway chamar uma API, o host dela precisa estar em `gateway.allowed-hosts`**. Sem
+ambiente). **Para o gateway chamar uma API, o host dela precisa estar liberado**: variável de ambiente `GATEWAY_HOSTS=pncp.gov.br,viacep.com.br`, o `application.yml`,
+ou um arquivo de texto (`GATEWAY_HOSTS_FILE`, veja `hosts.exemplo.txt`) que vale **sem reiniciar**. Sem
 isso, 403. Também dá para definir SSL por host e headers/tokens por API lógica.
 
 ### Instalando o lado Oracle

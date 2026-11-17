@@ -57,6 +57,12 @@ public class GatewayController {
         return tratar(r, lista, onde, campo, modo, sep, max);
     }
 
+    /** Hosts que o gateway aceita chamar neste momento (um por linha). */
+    @GetMapping("/hosts")
+    public ResponseEntity<String> hosts() {
+        return resposta(200, String.join("\n", client.hostsPermitidos()) + "\n");
+    }
+
     /** Contadores simples (chave=valor por linha) para monitorar carga, cache e saturação. */
     @GetMapping("/estatisticas")
     public ResponseEntity<String> estatisticas() {

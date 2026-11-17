@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  *
  * <ul>
  *   <li>{@code allowedHosts}: lista de hosts permitidos (allowlist). Host fora da lista = 403.</li>
+ *   <li>{@code allowedHostsFile}: arquivo de texto opcional (um host por linha), relido sem reiniciar.</li>
  *   <li>{@code hosts}: opções de SSL por host (opcional). Host listado aqui também é permitido.</li>
  *   <li>{@code apis}: nomes lógicos de API; o Oracle cita só o nome e o gateway injeta os headers
  *       (token etc.), então credenciais nunca passam pelo PL/SQL.</li>
@@ -18,6 +19,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 @ConfigurationProperties(prefix = "gateway")
 public record GatewayProperties(
         @DefaultValue List<String> allowedHosts,
+        String allowedHostsFile,
+        @DefaultValue("5") int allowedHostsRefreshSeconds,
         @DefaultValue Map<String, Host> hosts,
         @DefaultValue Map<String, Api> apis,
         @DefaultValue("10") int connectTimeoutSeconds,

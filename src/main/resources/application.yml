@@ -24,10 +24,14 @@ gateway:
   max-concurrent-per-host: 100 # chamadas simultâneas por API externa; acima disso espera
   queue-timeout-seconds: 10    # espera máxima na fila antes de responder 503
 
-  # Allowlist: só estes hosts podem ser chamados (minúsculas, sem https:// e sem porta).
-  allowed-hosts:
-    - pncp.gov.br
-    - viacep.com.br
+  # Allowlist: só estes hosts podem ser chamados. Três formas (podem ser combinadas):
+  #  1) variável de ambiente GATEWAY_HOSTS, separada por vírgula (vale este padrão se não existir);
+  #  2) editar a lista abaixo (precisa reiniciar);
+  #  3) arquivo de texto, um host por linha, relido sozinho a cada poucos segundos (SEM reiniciar):
+  #     defina GATEWAY_HOSTS_FILE=/caminho/hosts.txt  (veja hosts.exemplo.txt)
+  allowed-hosts: ${GATEWAY_HOSTS:pncp.gov.br,viacep.com.br}
+  allowed-hosts-file: ${GATEWAY_HOSTS_FILE:}
+  allowed-hosts-refresh-seconds: 5
 
   # Opções de SSL por host (OPCIONAL, só para hosts que precisam). Host listado aqui também é permitido.
   # Chave com ponto exige colchetes e aspas.

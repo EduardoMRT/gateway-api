@@ -244,6 +244,20 @@ Arquivo `application.yml`. **Alterou algo? Reinicie o gateway.**
 
 O gateway **só chama hosts da lista**. Qualquer outro recebe erro 403.
 
+Há **três formas** de informar os hosts liberados. Elas se **somam**: vale a união de todas.
+
+**Forma 1: variável de ambiente** `GATEWAY_HOSTS` (hosts separados por vírgula). Se ela não existir,
+vale o padrão do `application.yml` (`pncp.gov.br` e `viacep.com.br`). Precisa reiniciar o gateway.
+
+```
+Windows (cmd):         set GATEWAY_HOSTS=pncp.gov.br,viacep.com.br,api.outra.gov.br
+Windows (PowerShell):  $env:GATEWAY_HOSTS="pncp.gov.br,viacep.com.br,api.outra.gov.br"
+Linux / Docker:        export GATEWAY_HOSTS=pncp.gov.br,viacep.com.br,api.outra.gov.br
+IntelliJ:              Run > Edit Configurations > Environment variables > GATEWAY_HOSTS=...
+```
+
+**Forma 2: o `application.yml`** (também exige reiniciar):
+
 ```yaml
 gateway:
   allowed-hosts:
@@ -252,12 +266,34 @@ gateway:
     - api.outra.gov.br
 ```
 
-Regras:
+**Forma 3: arquivo de texto, sem reiniciar (a mais prática no dia a dia).** Crie um arquivo com um host
+por linha (veja `hosts.exemplo.txt`) e aponte para ele com a variável `GATEWAY_HOSTS_FILE`:
 
-- Nome do host **sem** `https://`, sem porta e sem caminho (o gateway ignora maiúsculas/minúsculas).
+```
+# hosts.txt
+pncp.gov.br
+viacep.com.br
+api.outra.gov.br
+```
+
+```
+set GATEWAY_HOSTS_FILE=C:\gateway\hosts.txt
+```
+
+O gateway relê o arquivo sozinho a cada poucos segundos (`allowed-hosts-refresh-seconds`, padrão 5)
+**quando ele muda**. Para **liberar** um host, acrescente uma linha. Para **remover**, apague a linha (ou
+comente com `#`). Vale em poucos segundos, sem reiniciar. Se o arquivo for apagado, ficam só os hosts das
+formas 1 e 2. Se o arquivo estiver ilegível, o gateway mantém a lista anterior e registra um aviso no log.
+
+Para conferir o que está liberado agora: `GET /hosts` (um host por linha).
+
+Regras comuns:
+
+- Basta o nome do host: `pncp.gov.br`. Se colar uma URL inteira (`https://pncp.gov.br/api/x`), o gateway
+  aproveita só o host. Maiúsculas e minúsculas não importam.
 - Só o **host** é conferido (a URL pode ter qualquer caminho).
 - Um host que tenha opções de SSL em `gateway.hosts` (seção 8) também é considerado liberado.
-- Para liberar uma API nova, é só incluir uma linha aqui e reiniciar.
+- Em Docker, monte o arquivo como volume e aponte `GATEWAY_HOSTS_FILE` para o caminho dentro do contêiner.
 
 ### 5.2 Todas as opções
 
@@ -276,7 +312,7 @@ gateway:
   max-concurrent-per-host: 100    # chamadas simultâneas por API externa
   queue-timeout-seconds: 10       # espera na fila antes de devolver 503
 
-  allowed-hosts: [ ... ]          # allowlist (seção 5.1)
+  allowed-hosts: ${GATEWAY_HOSTS:...}   # allowlist (seção 5.1); também por arquivo: GATEWAY_HOSTS_FILE
   hosts: { ... }                  # opcional: opções de SSL por host (seção 8)
   apis:  { ... }                  # APIs lógicas com token (seção 9)
 ```
@@ -700,7 +736,7 @@ Todos os erros chegam como `ORA-20100` com a mensagem do gateway.
 
 | Mensagem | Causa | O que fazer |
 |---|---|---|
-| `Gateway HTTP 403: Host não permitido: x` | O host não está em `gateway.allowed-hosts` | Pedir à infraestrutura para liberar (seção 5.1) |
+| `Gateway HTTP 403: Host não permitido: x` | O host não está em `gateway.allowed-hosts` | Incluir o host (variável `GATEWAY_HOSTS` ou arquivo `GATEWAY_HOSTS_FILE`, seção 5.1) |
 | `Gateway HTTP 403: A API lógica 'x' não pode ser usada com o host y` | `p_api` preso a outro host | Use a API com o host certo, ou cadastre outra |
 | `Gateway HTTP 400: API lógica desconhecida` | `p_api` com nome inexistente | Confira o nome em `gateway.apis` |
 | `Gateway HTTP 400: Filtro inválido` | `p_onde` sem `=` | Use `campo=valor` |
@@ -755,7 +791,7 @@ O Oracle desiste antes. Solução: reduza `read-timeout-seconds` (ex.: 30) ou `r
 `SET_TRANSFER_TIMEOUT` no `PKG_GATEWAY`.
 
 **10. Host novo esquecido.**
-Toda API nova exige liberar o host em `gateway.allowed-hosts` e **reiniciar** o gateway.
+Toda API nova exige liberar o host (seção 5.1). Pelo arquivo `GATEWAY_HOSTS_FILE` não precisa reiniciar; pela variável de ambiente ou pelo `application.yml`, precisa.
 
 **11. Credenciais compartilhadas no cache.**
 Veja a seção 9.3: uma API lógica por cidade quando os tokens diferem.
@@ -852,7 +888,7 @@ END F_D_CONSULTA_EMPENHO;
 
 ### 14.3 Checklist da migração
 
-- [ ] `pncp.gov.br` está em `gateway.allowed-hosts` e o gateway foi reiniciado.
+- [ ] `pncp.gov.br` está liberado (confira em `GET /hosts`).
 - [ ] A URL de `F_D_URL_API_PNCP` funciona no navegador/`curl`.
 - [ ] O `curl` ao gateway devolve o mesmo sequencial que a função antiga.
 - [ ] Os casos "empenho inexistente" e "empenho sem sequencial" (ambos `NULL`) continuam corretos.
@@ -884,6 +920,7 @@ END F_D_CONSULTA_EMPENHO;
 | `POST /enviar` | Envia o corpo recebido para a API externa |
 | `GET /saude` | Responde `OK` |
 | `GET /estatisticas` | Contadores `chave=valor` |
+| `GET /hosts` | Hosts liberados no momento (um por linha) |
 
 Parâmetros do `/extrair`: `url`, `campo` (obrigatórios); `lista`, `onde`, `modo` (`primeiro`|`todos`),
 `sep`, `max`, `api`, `cache` (opcionais). O `/enviar` aceita os mesmos, mais `metodo`; sem `campo`

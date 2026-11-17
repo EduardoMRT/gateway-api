@@ -9,7 +9,6 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +42,7 @@ public class ExternalApiClient {
     private final HttpClientProvider clients;
     private final SingleFlightCache<ExternalResponse> cache;
     private final Map<String, Semaphore> limites = new ConcurrentHashMap<>();
-    private final Set<String> permitidos = new HashSet<>();
+    private final AllowedHosts permitidos;
 
     private final AtomicLong chamadasExternas = new AtomicLong();
     private final AtomicLong tentativasExtras = new AtomicLong();
@@ -54,8 +53,12 @@ public class ExternalApiClient {
         this.props = props;
         this.clients = clients;
         this.cache = new SingleFlightCache<>(props.cacheMaxEntries(), System::currentTimeMillis);
-        props.allowedHosts().forEach(h -> permitidos.add(h.trim().toLowerCase()));
-        props.hosts().keySet().forEach(h -> permitidos.add(h.trim().toLowerCase()));
+        java.util.List<String> fixos = new java.util.ArrayList<>(props.allowedHosts());
+        fixos.addAll(props.hosts().keySet());
+        java.nio.file.Path arquivo = props.allowedHostsFile() == null || props.allowedHostsFile().isBlank()
+                ? null : java.nio.file.Path.of(props.allowedHostsFile().trim());
+        this.permitidos = new AllowedHosts(fixos, arquivo,
+                props.allowedHostsRefreshSeconds() * 1000L, System::currentTimeMillis);
     }
 
     public record ExternalResponse(int status, String body) {
@@ -76,7 +79,7 @@ public class ExternalApiClient {
         }
         URI uri = parse(url);
         String host = uri.getHost() == null ? null : uri.getHost().toLowerCase();
-        if (host == null || !permitidos.contains(host)) {
+        if (host == null || !permitidos.permite(host)) {
             throw new GatewayException(403, "Host não permitido: " + host);
         }
         Map<String, String> headers = headersDaApi(api, host);
@@ -178,6 +181,11 @@ public class ExternalApiClient {
                 throw new GatewayException(502, "Chamada interrompida");
             }
         }
+    }
+
+    /** Hosts liberados no momento (para o endpoint /hosts). */
+    public java.util.Set<String> hostsPermitidos() {
+        return permitidos.todos();
     }
 
     /** Contadores para o endpoint /estatisticas. */
