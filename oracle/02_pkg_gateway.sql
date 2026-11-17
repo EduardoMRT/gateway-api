@@ -1,4 +1,6 @@
 -- PKG_GATEWAY: cliente do gateway-api para Oracle 9i.
+-- NOTA: este script nao usa o caractere '&' literal (usa CHR(38)), para nao disparar o prompt
+-- "Informe valor para ..." do SQL*Plus/Toad. Se mesmo assim sua ferramenta perguntar algo, rode SET DEFINE OFF antes.
 -- NAO FOI TESTADO em Oracle 9i (nao havia banco disponivel). Compile e rode os exemplos de
 -- 03_exemplos.sql contra um gateway de teste antes de usar em producao.
 --
@@ -88,7 +90,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
         IF p_valor IS NULL THEN
             RETURN NULL;
         END IF;
-        RETURN '&' || p_nome || '=' || url_encode(p_valor);
+        RETURN CHR(38) || p_nome || '=' || url_encode(p_valor);   -- CHR(38) = '&'
     END param;
 
     -- Chamada ao gateway. p_corpo NULL = GET; senao POST com o corpo.
@@ -176,7 +178,7 @@ CREATE OR REPLACE PACKAGE BODY PKG_GATEWAY AS
     BEGIN
         v_txt := chamar(C_BASE || '/extrair?url=' || url_encode(p_url)
                         || param('lista', p_lista) || param('onde', p_onde)
-                        || param('campo', p_campos) || '&modo=todos'
+                        || param('campo', p_campos) || CHR(38) || 'modo=todos'
                         || param('max', TO_CHAR(p_max)) || param('api', p_api)
                         || param('cache', TO_CHAR(p_cache)), NULL);
         IF v_txt IS NULL THEN
